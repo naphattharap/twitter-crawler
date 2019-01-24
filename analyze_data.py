@@ -17,12 +17,10 @@ from matplotlib import  pyplot as plt
 
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-from _util import make_document_term_matrix
 import mpl_toolkits
 import numpy as np
 import pandas as pd
 import simplejson as json
-from topic_tokenizer import TopicTokenizer
 
 conda_file_dir = conda.__file__
 conda_dir = conda_file_dir.split('lib')[0]
@@ -180,21 +178,15 @@ for city in cities:
     mean_polarity = sum_data.loc[sum_data['place_name'] == city]['polarity'].values[0]
     color = ""
     if mean_polarity == 0:
-        color = 'bo'
+        color = 'yo'
     elif mean_polarity > 0:
         color = 'go'
     else:
         color = 'ro'
     x, y = map(centroid_long, centroid_lat)  
-    map.plot(x, y, color, markersize=6)
+    map.plot(x, y, color, markersize=4)
 # alpha
-# neutral = plt.plot(z, "yo", markersize=15)
-# positive = plt.plot(z, "go", markersize=15)
-# negative = plt.plot(z, "ro", markersize=15)
-# Put a white cross over some of the data.
-# white_cross, = plt.plot(z[:5], "w+", markeredgewidth=3, markersize=15)
-
-plt.legend([neutral, positive, negative], ["Positive", "Neutral", "Negative"])
+# {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'};
 plt.legend()   
 plt.show()
 
