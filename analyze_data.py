@@ -184,7 +184,7 @@ for city in cities:
     else:
         color = 'ro'
     x, y = map(centroid_long, centroid_lat)  
-    map.plot(x, y, color, markersize=4)
+    map.plot(x, y, color, markersize=4, alpha=0.5)
 # alpha
 # {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'};
 plt.legend()   
