@@ -1,4 +1,3 @@
-
 import csv
 from html.parser import HTMLParser
 import logging
@@ -6,15 +5,12 @@ import os
 from pprint import pprint
 import re
 import time
-
-import emoji
 from matplotlib import  pyplot as plt
 from textblob import TextBlob
 from tweepy import OAuthHandler, Stream
 import tweepy 
 from tweepy.streaming import StreamListener
 
-from _util import make_document_term_matrix
 import simplejson as json
 
 logging.getLogger("TweetListener").setLevel(logging.DEBUG)
@@ -35,46 +31,23 @@ class TweetListener(StreamListener):
         # Tweets counter
         self.num_tweets_counter = 0
         # File name to store content
-        # self.store_data_file = "content.json"
         self.store_data_file_csv = "travel_content.csv"
-        # self.memory_data = []
-#         self.emoji_pattern = re.compile("["
-#                                u"\U0001F600-\U0001F64F"  # emoticons
-#                                u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-#                                u"\U0001F680-\U0001F6FF"  # transport & map symbols
-#                                u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-#                                u"\U00002702-\U000027B0"
-#                                u"\U000024C2-\U0001F251"
-#                                "]+", flags=re.UNICODE)
     
         self.emoji_pattern = re.compile('[\U00010000-\U0010ffff]', flags=re.UNICODE)
         self.html_parser = HTMLParser()
         self.url_re = re.compile(r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
-        # https://github.com/nltk/nltk/blob/develop/nltk/tokenize/casual.py#L327
+        # Reference https://github.com/nltk/nltk/blob/develop/nltk/tokenize/casual.py#L327
         self.twitter_handle_re = re.compile(r"(?<![A-Za-z0-9_!@#\$%&*])@(([A-Za-z0-9_]){20}(?!@))|(?<![A-Za-z0-9_!@#\$%&*])@(([A-Za-z0-9_]){1,19})(?![A-Za-z0-9_]*@)")
-
-    def remove_emoji(self, string):
-#         emoji_pattern = re.compile("["
-#                                u"\U0001F600-\U0001F64F"  # emoticons
-#                                u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-#                                u"\U0001F680-\U0001F6FF"  # transport & map symbols
-#                                u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-#                                u"\U00002702-\U000027B0"
-#                                u"\U000024C2-\U0001F251"
-#                                "]+", flags=re.UNICODE)
-        return self.emoji_pattern.sub(r'', string)
 
     def pre_precess(self, text):
         
         result_text = self.html_parser.unescape(text)
-        
         result_text = result_text.encode('ascii', 'ignore').decode('utf-8')
         result_text = self.url_re.sub('', result_text)
         result_text = result_text.strip()
         result_text = result_text.replace('\r', '').replace('\n', '')
-        # new_text = self.remove_emoji(text)
-        # logging.debug("new_text %s ", result_text.decode('utf-8'))
-        print(result_text)
+
+        logging.debug(result_text)
         return result_text
     
     def extract_feature(self, tweet):
@@ -83,21 +56,6 @@ class TweetListener(StreamListener):
         Result is array of object (csv row)
         """
         row = []
-        # selected_features = {}
-        # convert incoming str format to dict object.
-        # created_at : Sun Jan 20 15:49:56 +0000 2019
-        # ts = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(obj['created_at'],'%a %b %d %H:%M:%S +0000 %Y'))
-        # selected_features["created_at"] = obj["created_at"]
-        # text
-        # selected_features["text"] = obj["text"]
-        # entities: hashtags, symbols, 
-        # selected_features["entities"] = obj["entities"]
-        # place: country, country_code = "TH", place_type: 'city'
-        # selected_features["place"] = obj["place"]
-        
-        # print(selected_features)
-        # return selected_features
-        # followers_count
         row.append(tweet["created_at"])
         processed_text = self.pre_precess(tweet["text"])
         row.append(processed_text)
@@ -164,30 +122,6 @@ class TweetListener(StreamListener):
         analysis = TextBlob(text)
         pprint(analysis.sentiment)
         return analysis
-    
-    def flush_data(self):
-        """
-        Write data in memory to file
-        """
-        if not os.path.isfile(self.store_data_file):
-            with open(self.store_data_fil, mode='w') as f:
-                f.write(json.dumps(self.memory_data, indent=2))
-        else:
-            with open(self.store_data_file, mode='r') as feedsjson:
-                if feedsjson.read() != "":
-                    feeds = json.load(feedsjson)
-                    feeds.append(self.memory_data)
-                else:
-                    feeds = self.memory_data
-                
-            with open(self.store_data_file, mode='a') as f:
-                f.write(json.dumps(feeds, indent=2))
-        
-        self.memory_data = []
-    
-    def flush_csv(self):
-        handle = csv.writer(open(self.store_data_file_csv, 'wb'))
-        handle.writerow(status.author.screen_name, status.created_at, status.text)
 
     def on_data(self, data):
         """
@@ -197,9 +131,6 @@ class TweetListener(StreamListener):
         Manage every coming tweet
         """
         try:
-            # with open('file.txt', 'w') as f: 
-            # f.write('Author,Date,Text')
-
             # open file and append, put tweet at the end of the file
             with open(self.store_data_file_csv, 'a') as f:
                 # write data to the file
@@ -209,14 +140,7 @@ class TweetListener(StreamListener):
                     print('----- process tweet data -------')
                     row = self.extract_feature(tweet)
                 
-                # Do sentimental analysis
-#                 analysis = self.analyze_sentiment(selected_features["text"])
-#                 selected_features["polarity"] = analysis.sentiment.polarity
-#                 selected_features["subjectivity"] = analysis.sentiment.subjectivity
-                # f.write(json.dumps(selected_features, indent=4))
-                # twitter_text = json.loads(data)['text']
                     logging.debug(row)
-                    # self.memory_data.append(row)
                     
                     writer = csv.writer(f)
                     writer.writerow(row)
@@ -225,7 +149,6 @@ class TweetListener(StreamListener):
                     if self.num_tweets_counter < self.num_tweets_collect:
                         return True
                     else: 
-                        # self.flush_csv()
                         return False
                 
         except BaseException as e:
@@ -281,30 +204,8 @@ def get_authenticated():
 def read_data(file_content_name):
     content_data = []
     with open(file_content_name) as f:
-        # with open('contents/intents.json') as f:
-        # content = json.load(f)
         print(content)
         return content
-
-
-def find_hot_topic(tweet_texts):
-    tokenizer = TopicTokenizer()
-    token_list = []
-    for arr in tweet_texts:
-        for t in arr:
-            token_list.append(tokenizer.tokenize(t))
-    return token_list
-
-
-def get_vocabulary_helper(topic_numbers, number=5):
-    vocab = np.array(list(vocabulary.keys()))
-    topic_models = model.topic_word_
-    result = []
-    for topic_number in topic_numbers:
-        words = vocab[np.argsort(topic_models[topic_number])][:-(number + 1):-1]
-        result.append(words)
-        
-    return result
 
 
 auth, api = get_authenticated()
@@ -313,14 +214,11 @@ twitter_stream = Stream(auth, TweetListener())
 # It looks for the word here, not hashtag.
 
 # Find location from http://boundingbox.klokantech.com/
-THAILAND_LOC = [97.34, 5.61, 105.64, 20.46]
-locations = THAILAND_LOC;
+# THAILAND_LOC = [97.34, 5.61, 105.64, 20.46]
+# locations = THAILAND_LOC;
 
 locale = 'en'
-topics = []
 topics = ["travel"]
 # twitter_stream.filter(track=topics, languages=languages, locations=locations) 
 twitter_stream.filter(track=topics, languages=["en"])
-# read_data("content.json")
-# twitter_stream.sample(languages=languages)
 
