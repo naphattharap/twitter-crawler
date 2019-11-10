@@ -21,6 +21,8 @@ About 5000 tweets were collected on 24 January 2019 for analyzing.
 ## Visualization
 1. Hot mentioned cities. To visualize which cities are mentioned as its frequency, cities’ name are represented in
 Word Cloud.
+![alt text](https://github.com/naphattharap/twitter-crawler/blob/master/viz-hot-tags.png)
 
 2. Sentimental Analysis is represented in world map to visualize how twitter’s users felt about the city that they have
 mentioned in green, yellow and red which mean to positive, neutral and negative respectively.
+![alt text](https://github.com/naphattharap/twitter-crawler/blob/master/viz-worldmap-sentiment.png)
