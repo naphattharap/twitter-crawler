@@ -189,10 +189,10 @@ class TweetListener(StreamListener):
     
     
 def get_authenticated():
-    consumer_key = 'QUDV4cMi6b4PVwNKe9REjem6A'
-    consumer_secret = '0kjmAb0ve7zJ9CcCfEFMifCZknCOF5NsHI3ovS1AIq0QHeQ2LS'
-    access_token = '1083734025100017664-jzVgFpfib28Nkv8NY1xMPnn2bagZqe'
-    access_secret = '4Xa8CBVdQv9m3Io2TgA2os3Ho756S1RsS2pKf72PRcWBu'
+    consumer_key = '${your key}'
+    consumer_secret = '${your key}'
+    access_token = '${your key}'
+    access_secret = '${your key}'
     
     auth = OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_secret)
